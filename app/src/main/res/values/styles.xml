@@ -1,0 +1,25 @@
+<resources>
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorPrimary</item>
+    </style>
+
+
+    <style name="toolbar" parent="ThemeOverlay.AppCompat.ActionBar">
+
+        <item name="colorControlNormal">@color/white</item>
+        <item name="actionMenuTextColor">@color/white</item>
+        <item name="android:actionMenuTextColor">@color/white</item>
+    </style>
+
+    
+    <style name="recycler_item_main_text_view">
+        
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/recycler_item_main_text_view_color</item>
+    </style>
+
+</resources>

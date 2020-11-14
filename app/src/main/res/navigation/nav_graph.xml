@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/productsFragment">
+
+    <activity
+        android:id="@+id/mainActivity"
+        android:name="com.mahozi.sayed.comparisist.MainActivity"
+        android:label="activity_main"
+        tools:layout="@layout/activity_main" />
+
+    <fragment
+        android:id="@+id/productsFragment"
+        android:name="com.mahozi.sayed.comparisist.products.ProductsFragment"
+        android:label="@string/fragment_products"
+        tools:layout="@layout/fragment_products" >
+        <action
+            android:id="@+id/action_productsFragment_to_createProductFragment"
+            app:destination="@id/createProductFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/createProductFragment"
+        android:name="com.mahozi.sayed.comparisist.products.CreateProductFragment"
+        android:label="Create a product"
+        tools:layout="@layout/fragment_create_product" >
+        <action
+            android:id="@+id/action_createProductFragment_to_createProductItemFragment"
+            app:destination="@id/createProductItemFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/createProductItemFragment"
+        android:name="com.mahozi.sayed.comparisist.products.CreateProductItemFragment"
+        android:label="fragment_create_product_item"
+        tools:layout="@layout/fragment_create_product_item" />
+</navigation>
