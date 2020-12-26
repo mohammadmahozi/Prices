@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "com.mahozi.sayed.comparisist"
-        minSdkVersion 15
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -34,9 +34,13 @@ android {
     }
 
 
-    viewBinding {
-        enabled = true
+    buildFeatures {
+
+        viewBinding {
+            enabled = true
+        }
     }
+
 }
 
 dependencies {
@@ -73,6 +77,13 @@ dependencies {
     implementation "androidx.cardview:cardview:1.0.0"
 
     implementation 'io.github.luizgrp.sectionedrecyclerviewadapter:sectionedrecyclerviewadapter:3.2.0'
+
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+
+    implementation 'com.google.android.gms:play-services-mlkit-barcode-scanning:16.1.3'
+
+
+
 
 
 }

@@ -2,18 +2,19 @@ package com.mahozi.sayed.comparisist.products
 
 
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.mahozi.sayed.comparisist.R
 import com.mahozi.sayed.comparisist.products.database.ProductEntity
+import com.mahozi.sayed.comparisist.products.database.ProductModel
 import io.github.luizgrp.sectionedrecyclerviewadapter.Section
 import io.github.luizgrp.sectionedrecyclerviewadapter.SectionParameters
-import io.github.luizgrp.sectionedrecyclerviewadapter.utils.EmptyViewHolder
 
 
 class ProductsSection: Section(SectionParameters.builder().itemResourceId(R.layout.recycler_item_product).build()) {
 
-    var dataList = listOf<ProductEntity>()
+    var dataList = listOf<ProductModel>()
 
     override fun getContentItemsTotal(): Int {
         return dataList.size
@@ -28,14 +29,20 @@ class ProductsSection: Section(SectionParameters.builder().itemResourceId(R.layo
         val itemHolder: ProductViewHolder = holder as ProductViewHolder
 
         // bind your view here
-        itemHolder.productNameTextView.text = dataList.get(position).productName
+        val productModel = dataList[position]
+        val productInfo = productModel.productName + ", " + productModel.brandName + ", " + productModel.size + productModel.sizeUnit + ", " + productModel.storeName
+        itemHolder.productNameTextView.text = productInfo
+
+        itemHolder.priceTextView.text = productModel.price.toString()
     }
 
 
 
     internal class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        val productNameTextView: TextView = itemView.findViewById(R.id.product_name_text_view)
+        val productNameTextView: TextView = itemView.findViewById(R.id.product_info_text_view)
+        val priceTextView: TextView = itemView.findViewById(R.id.price_text_view)
+        val productImageView: ImageView = itemView.findViewById(R.id.product_image_view)
 
     }
 

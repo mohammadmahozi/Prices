@@ -1,21 +1,18 @@
 package com.mahozi.sayed.comparisist.products.database
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.PrimaryKey
+import androidx.room.*
 
+//
 
 @Entity(foreignKeys = [
-
-    ForeignKey(entity = SizeEntity::class, parentColumns = ["sizeId"], childColumns = ["sizeId"]),
 
     ForeignKey(entity = ProductEntity::class, parentColumns = ["productId"], childColumns = ["productId"]),
 
     ForeignKey(entity = BrandEntity::class, parentColumns = ["brandId"], childColumns = ["brandId"])
 
 
-])
+], indices = [Index(value = ["productName", "brandId", "size", "sizeUnit"], unique = true)]
+)
 data class ProductEntity(
 
     @ColumnInfo
@@ -25,12 +22,14 @@ data class ProductEntity(
     val brandId: Long,
 
     @ColumnInfo
-    val sizeId: Long,
+    val size: Double,
+
+    @ColumnInfo
+    val sizeUnit: String,
 
 
 
     @PrimaryKey(autoGenerate = true)
-    //@ColumnInfo(name = "product_id")
     val productId: Long = 0L
 
 

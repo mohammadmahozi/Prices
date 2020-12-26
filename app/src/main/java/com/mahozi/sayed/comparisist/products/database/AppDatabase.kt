@@ -8,13 +8,12 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import java.util.*
 
 
-@Database(entities = [BrandEntity::class, PriceEntity::class, ProductEntity::class,  SizeEntity::class, StoreEntity::class], version = 1)
+@Database(entities = [BrandEntity::class, PriceEntity::class, ProductEntity::class, StoreEntity::class], version = 1)
 abstract class AppDatabase: RoomDatabase() {
 
     abstract val brandDao: BrandDao
     abstract val priceDao: PriceDao
     abstract val productDao: ProductDao
-    abstract val sizeDao: SizeDao
     abstract val storeDao: StoreDao
 
 

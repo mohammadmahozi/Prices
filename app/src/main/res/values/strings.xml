@@ -19,4 +19,5 @@
     <string name="note">Note</string>
     <string name="deal">Deal</string>
     <string name="unit">Unit</string>
+    <string name="scan_barcode">Scan Barcode</string>
 </resources>

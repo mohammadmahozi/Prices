@@ -1,7 +1,7 @@
 package com.mahozi.sayed.comparisist.products
 
-import android.R
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +10,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mahozi.sayed.comparisist.databinding.FragmentProductsBinding
 import io.github.luizgrp.sectionedrecyclerviewadapter.SectionedRecyclerViewAdapter
@@ -51,7 +50,10 @@ class ProductsFragment : Fragment() {
         val sectionAdapter = SectionedRecyclerViewAdapter()
 
         val productsSection = ProductsSection()
-        viewModel.selectAllProducts().observe(viewLifecycleOwner, Observer {productsSection.dataList = it})
+        viewModel.productsAndPricesLiveDataList.observe(viewLifecycleOwner, Observer {
+
+            productsSection.dataList = it
+        })
         sectionAdapter.addSection(productsSection)
 
 

@@ -1,17 +1,23 @@
 package com.mahozi.sayed.comparisist.products
 
+import android.app.Activity.RESULT_OK
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.*
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.CheckBox
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import com.mahozi.sayed.comparisist.R
 import com.mahozi.sayed.comparisist.databinding.FragmentCreateProductBinding
 import com.mahozi.sayed.comparisist.hideKeyboard
-import com.mahozi.sayed.comparisist.products.domain.ProductModel
+import kotlinx.android.synthetic.main.fragment_create_product.*
+import java.lang.Exception
+import java.lang.NumberFormatException
 
 
 /**
@@ -21,26 +27,34 @@ import com.mahozi.sayed.comparisist.products.domain.ProductModel
  */
 class CreateProductFragment : Fragment() {
 
+    private val REQUEST_IMAGE_CAPTURE = 1
+
+
     private var _binding: FragmentCreateProductBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var viewModel: ProductsViewModel
 
 
+    private lateinit var productImageButton: ImageButton
     private lateinit var productNameEditText: AutoCompleteTextView
     private lateinit var productBrandEditText: AutoCompleteTextView
     private lateinit var productSizeEditText: AutoCompleteTextView
     private lateinit var productUnitEditText: AutoCompleteTextView
     private lateinit var productStoreEditText: AutoCompleteTextView
-    private lateinit var productQuantityEditText: AutoCompleteTextView
-    private lateinit var productPriceEditText: AutoCompleteTextView
-    private lateinit var productDateEditText: AutoCompleteTextView
+    private lateinit var productQuantityEditText: EditText
+    private lateinit var productPriceEditText: EditText
+    private lateinit var productDateEditText: EditText
     private lateinit var isDealCheckBox: CheckBox
 
+    private lateinit var productAdapter: ArrayAdapter<String>
 
     private lateinit var brandAdapter: ArrayAdapter<String>
-    private lateinit var sizeAdapter: ArrayAdapter<Double>
+
     private lateinit var unitAdapter: ArrayAdapter<String>
+
+    private lateinit var storeAdapter: ArrayAdapter<String>
+
 
 
 
@@ -51,15 +65,17 @@ class CreateProductFragment : Fragment() {
         viewModel = ViewModelProvider(this).get(ProductsViewModel::class.java)
 
 
+
+        productAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_dropdown_item_1line, viewModel.getProductNames())
+
+
         brandAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_dropdown_item_1line, viewModel.getBrandNames())
-        sizeAdapter = ArrayAdapter<Double>(requireContext(), android.R.layout.simple_dropdown_item_1line, viewModel.getSizeNumbers())
-        unitAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_dropdown_item_1line, viewModel.getSizeUnits())
 
 
+        unitAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_dropdown_item_1line, viewModel.getProductUnits())
 
 
-
-
+        storeAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_dropdown_item_1line, viewModel.getStoreNames())
 
     }
 
@@ -70,10 +86,22 @@ class CreateProductFragment : Fragment() {
 
         setHasOptionsMenu(true)
 
+
         _binding = FragmentCreateProductBinding.inflate(inflater, container, false)
 
 
+
+        productImageButton = binding.productImageButton
+        productImageButton.setOnClickListener{
+
+            dispatchTakePictureIntent()
+        }
+
+
+
         productNameEditText = binding.productNameEditText
+        productNameEditText.setAdapter(productAdapter)
+
 
 
         productBrandEditText = binding.brandNameEditText
@@ -81,7 +109,6 @@ class CreateProductFragment : Fragment() {
 
 
         productSizeEditText = binding.sizeEditText
-        productSizeEditText.setAdapter(sizeAdapter)
 
 
         productUnitEditText = binding.unitEditText
@@ -89,6 +116,10 @@ class CreateProductFragment : Fragment() {
 
 
         productStoreEditText = binding.storeNameEditText
+        productStoreEditText.setAdapter(storeAdapter)
+
+
+
         productQuantityEditText = binding.quantityEditText
         productPriceEditText = binding.priceEditText
         productDateEditText = binding.dateEditText
@@ -109,28 +140,122 @@ class CreateProductFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
         if (item.itemId == R.id.confirm) {
-            viewModel.onConfirmCreateProduct(
-                ProductModel(
 
-                    productNameEditText.text.toString().trim(),
-                    productBrandEditText.listSelection.toLong(),
-                    productSizeEditText.listSelection.toLong()
-                    )
+
+            val size = try {
+
+                val sizeAsString = productSizeEditText.text.toString().trim()
+
+                if (sizeAsString == ""){
+                    Toast.makeText(requireContext(), "Size field cannot be empty", Toast.LENGTH_LONG).show()
+                    return false
+                }
+
+                sizeAsString.toDouble()
+
+
+                }
+
+                catch (e: NumberFormatException){
+
+                    0.0
+                }
+
+
+            val quantity = try {
+
+                productQuantityEditText.text.toString().trim().toDouble()
+            }
+
+            catch (e: NumberFormatException){
+                -1.0
+            }
+
+            val price = try {
+
+                productPriceEditText.text.toString().trim().toDouble()
+            }
+
+            catch (e: NumberFormatException){
+                -1.0
+            }
+
+            val formInput = ProductFormModel(
+                productNameEditText.listSelection.toLong(),
+                productNameEditText.text.toString().trim(),
+                productBrandEditText.listSelection.toLong(),
+                productBrandEditText.text.toString().trim(),
+                size,
+                productUnitEditText.text.toString().trim(),
+                productStoreEditText.listSelection.toLong(),
+                productStoreEditText.text.toString().trim(),
+                quantity,
+                price,
+                productDateEditText.text.toString().trim(),
+                isDealCheckBox.isChecked
             )
 
-            viewModel.selectedBrandName = productBrandEditText.text.toString().trim()
-            viewModel.selectedSizeNumber = productSizeEditText.text.toString().trim()
-            viewModel.selectedSizeUnit = productUnitEditText.text.toString().trim()
+            if (isFormValid(formInput)){
+
+                viewModel.insertProduct(formInput)
 
 
-            //Navigation.findNavController(requireView()).popBackStack()
-            Navigation.findNavController(requireView()).navigate(CreateProductFragmentDirections.actionCreateProductFragmentToCreateProductItemFragment())
-            hideKeyboard()
+                Navigation.findNavController(requireView()).popBackStack()
+                //Navigation.findNavController(requireView()).navigate(CreateProductFragmentDirections.actionCreateProductFragmentToCreateProductItemFragment())
+                hideKeyboard()
+
+            }
+
+            else{
+                Toast.makeText(
+                    requireContext(),
+                    "Name, brand, size, and unit cannot be Empty",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+
+
+
+        }
+
+        else if(item.itemId == R.id.scan_barcode_menu_item){
+
+            view?.findNavController()?.navigate(CreateProductFragmentDirections.actionCreateProductFragmentToQRScanFragment())
 
         }
             return super.onOptionsItemSelected(item)
     }
 
+
+    private fun isFormValid(input: ProductFormModel): Boolean{
+
+        if (input.productName.isEmpty() || input.brandName.isEmpty() || input.unit.isEmpty()){
+            return false
+        }
+
+        return true
+    }
+
+
+    private fun dispatchTakePictureIntent() {
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        try {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+        } catch (e: ActivityNotFoundException) {
+            // display error state to the user
+        }
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            val imageBitmap = data?.extras?.get("data") as Bitmap
+            productImageButton.setImageBitmap(imageBitmap)
+        }
+
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

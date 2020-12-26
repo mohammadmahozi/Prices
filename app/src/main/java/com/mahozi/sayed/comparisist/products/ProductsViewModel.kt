@@ -4,14 +4,14 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import com.mahozi.sayed.comparisist.products.database.*
-import com.mahozi.sayed.comparisist.products.domain.ProductModel
 
 class ProductsViewModel(application: Application): AndroidViewModel(application){
 
-    private val brandsList = selectAllBrands()
+    val productsAndPricesLiveDataList: LiveData<List<ProductModel>> by lazy {
 
-    private val sizesList = selectAllSizes()
+        selectAllProductsAndPrices()
 
+    }
 
     private val productsRepository: ProductsRepository =
         ProductsRepository(
@@ -19,51 +19,56 @@ class ProductsViewModel(application: Application): AndroidViewModel(application)
         )
 
 
+    private val productsList = productsRepository.selectAllProducts()
 
-    private fun insertProduct(productEntity: ProductEntity){
-        productsRepository.insertProduct(productEntity)
+
+    fun getProductNames(): List<String>{
+
+        return productsList.map { it.productName }
+    }
+
+    fun getProductUnits(): List<String>{
+
+        return productsList.map { it.sizeUnit }
     }
 
 
-    fun onConfirmCreateProduct(name: String, brand: String, size: Double, unit: String, store: String, quantity: Int, price: Double, date: String, isDeal: Boolean){
 
+
+    private val brandsList = productsRepository.selectAllBrands()
+
+
+
+
+    fun insertProduct(productFormModel: ProductFormModel){
+
+
+        productsRepository.insertProduct(productFormModel)
 
     }
 
-    fun onConfirmCreateProduct(name: String, brand: String, sizeEntity: SizeEntity, store: String, quantity: Int, price: Double, date: String, isDeal: Boolean){
 
 
+
+
+     fun selectAllProductsAndPrices(): LiveData<List<ProductModel>> {
+
+        return productsRepository.selectAllProductsAndPrices()
     }
 
-    fun selectAllProducts(): LiveData<List<ProductEntity>> {
-
-        return productsRepository.selectAllProducts()
-    }
-
-
-    private fun selectAllBrands(): List<BrandEntity> {
-
-        return productsRepository.selectAllBrands()
-    }
 
     fun getBrandNames(): List<String>{
 
         return brandsList.map { it.brandName }
     }
 
-    private fun selectAllSizes(): List<SizeEntity>{
 
-        return productsRepository.selectAllSizes()
+
+    fun getStoreNames(): List<String>{
+
+        return productsRepository.selectAllStores().map{ it.storeName }
     }
 
-    fun getSizeNumbers(): List<Double>{
 
-        return sizesList.map { it.size }
-    }
-
-    fun getSizeUnits(): List<String>{
-
-        return sizesList.map { it.unit }
-    }
 
 }

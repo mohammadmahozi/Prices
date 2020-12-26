@@ -26,12 +26,11 @@
         android:label="Create a product"
         tools:layout="@layout/fragment_create_product" >
         <action
-            android:id="@+id/action_createProductFragment_to_createProductItemFragment"
-            app:destination="@id/createProductItemFragment" />
+            android:id="@+id/action_createProductFragment_to_QRScanFragment"
+            app:destination="@id/QRScanFragment" />
     </fragment>
     <fragment
-        android:id="@+id/createProductItemFragment"
-        android:name="com.mahozi.sayed.comparisist.products.CreateProductItemFragment"
-        android:label="fragment_create_product_item"
-        tools:layout="@layout/fragment_create_product_item" />
+        android:id="@+id/QRScanFragment"
+        android:name="com.mahozi.sayed.comparisist.products.QRScanFragment"
+        android:label="QRScanFragment" />
 </navigation>
