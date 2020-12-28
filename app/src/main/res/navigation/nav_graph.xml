@@ -31,6 +31,6 @@
     </fragment>
     <fragment
         android:id="@+id/QRScanFragment"
-        android:name="com.mahozi.sayed.comparisist.products.QRScanFragment"
+        android:name="com.mahozi.sayed.comparisist.products.qr.QRScanFragment"
         android:label="QRScanFragment" />
 </navigation>

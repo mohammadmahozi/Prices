@@ -1,12 +1,14 @@
-
+package com.mahozi.sayed.comparisist.products.qr
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.util.Size
 
 import android.view.*
 import android.widget.Toast
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -20,19 +22,15 @@ import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-/**
- * A simple [Fragment] subclass.
- */
-class CameraFragment : Fragment() {
+
+class QRScanFragment : Fragment() {
 
     private var _binding: FragmentQrScanBinding? = null
     private val binding get() = _binding!!
 
 
-    private var imageCapture: ImageCapture? = null
-
-    private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
+
 
     private lateinit var previewView: PreviewView
 
@@ -43,13 +41,13 @@ class CameraFragment : Fragment() {
         // Request camera permissions
         if (allPermissionsGranted()) {
             startCamera()
-        } else {
-            ActivityCompat.requestPermissions(
-                requireActivity(), REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
 
-
-        outputDirectory = getOutputDirectory()
+        else {
+            ActivityCompat.requestPermissions(
+                requireActivity(), REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
+            )
+        }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
 
@@ -58,7 +56,7 @@ class CameraFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         _binding = FragmentQrScanBinding.inflate(inflater, container, false)
 
@@ -66,15 +64,10 @@ class CameraFragment : Fragment() {
         previewView = binding.previewView
 
 
-
         return binding.root
-
 
     }
 
-
-
-    private fun takePhoto() {}
 
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
@@ -84,24 +77,53 @@ class CameraFragment : Fragment() {
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
 
             // Preview
-            val preview = Preview.Builder()
-                .build()
-                .also {
-                    it.setSurfaceProvider(previewView.surfaceProvider)
-                }
+            val preview = Preview.Builder().build().also {
+
+                it.setSurfaceProvider(previewView.surfaceProvider)
+            }
+
+
+            val imageCapture = ImageCapture.Builder().build()
+
 
             // Select back camera as a default
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
+
+            val imageAnalysis = ImageAnalysis.Builder().setTargetResolution(Size(1280, 720))
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build()
+
+
+            val analyzer: ImageAnalysis.Analyzer = QrCodeAnalyzer(object : ScanningResultListener {
+                override fun onScanned(result: String) {
+                    requireActivity().runOnUiThread {
+
+                        imageAnalysis.clearAnalyzer()
+
+                        cameraProvider.unbindAll()
+
+                    }
+                }
+            })
+
+
+            imageAnalysis.setAnalyzer(cameraExecutor, analyzer)
+
+            //preview.setSurfaceProvider(binding.previewView.surfaceProvider)
+
+            cameraProvider.bindToLifecycle(this, cameraSelector, imageAnalysis, preview)
+
 
             try {
                 // Unbind use cases before rebinding
                 cameraProvider.unbindAll()
 
                 // Bind use cases to camera
-                cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview)
+                cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalysis, imageCapture)
 
-            } catch(exc: Exception) {
+            }
+
+            catch(exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
 
@@ -114,13 +136,7 @@ class CameraFragment : Fragment() {
             requireActivity().baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun getOutputDirectory(): File {
 
-        val mediaDir = requireActivity().externalMediaDirs.firstOrNull()?.let {
-            File(it, resources.getString(R.string.app_name)).apply { mkdirs() } }
-        return if (mediaDir != null && mediaDir.exists())
-            mediaDir else requireActivity().filesDir
-    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -144,8 +160,7 @@ class CameraFragment : Fragment() {
 
 
     companion object {
-        private const val TAG = "CameraXBasic"
-        private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
+        private const val TAG = "QRScanFragment"
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
     }
