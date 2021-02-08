@@ -1,6 +1,7 @@
-package com.mahozi.sayed.comparisist.products.database
+package com.mahozi.sayed.comparisist.products.database.product
 
 import androidx.room.*
+import com.mahozi.sayed.comparisist.products.database.brand.BrandEntity
 
 //
 
@@ -27,7 +28,11 @@ data class ProductEntity(
     @ColumnInfo
     val sizeUnit: String,
 
+    @ColumnInfo
+    val productImagePath: String,
 
+    @ColumnInfo
+    val barcode: String,
 
     @PrimaryKey(autoGenerate = true)
     val productId: Long = 0L

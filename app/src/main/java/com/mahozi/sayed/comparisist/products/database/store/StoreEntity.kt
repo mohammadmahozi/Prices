@@ -1,10 +1,11 @@
-package com.mahozi.sayed.comparisist.products.database
+package com.mahozi.sayed.comparisist.products.database.store
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity
+@Entity(indices = [Index(value = ["storeName"], unique = true)])
 data class StoreEntity(
 
     @ColumnInfo
@@ -12,7 +13,6 @@ data class StoreEntity(
 
 
     @PrimaryKey(autoGenerate = true)
-    //@ColumnInfo(name = "store_id")
     val storeId: Long = 0L
 
 

@@ -1,20 +1,18 @@
-package com.mahozi.sayed.comparisist.products
+package com.mahozi.sayed.comparisist.products.create
+
 
 data class ProductFormModel(
 
-    val productId: Long,
+    val productImagePath: String,
 
     val productName: String,
-
-    val brandId: Long,
+    val barcode: String,
 
     val brandName: String,
 
     val size: Double,
 
-    val unit: String,
-
-    val storeId: Long,
+    val sizeUnit: String,
 
     val storeName: String,
 
@@ -22,8 +20,11 @@ data class ProductFormModel(
 
     val price: Double,
 
-    val date: String,
+    val dateAdded: String,
 
     val isDeal: Boolean
 ) {
+
 }
+
+

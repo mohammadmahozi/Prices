@@ -1,11 +1,18 @@
-package com.mahozi.sayed.comparisist.products.database
+package com.mahozi.sayed.comparisist
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import java.util.*
+import com.mahozi.sayed.comparisist.products.database.brand.BrandDao
+import com.mahozi.sayed.comparisist.products.database.brand.BrandEntity
+import com.mahozi.sayed.comparisist.prices.database.PriceDao
+import com.mahozi.sayed.comparisist.prices.database.PriceEntity
+import com.mahozi.sayed.comparisist.products.database.product.ProductDao
+import com.mahozi.sayed.comparisist.products.database.product.ProductEntity
+import com.mahozi.sayed.comparisist.products.database.store.StoreDao
+import com.mahozi.sayed.comparisist.products.database.store.StoreEntity
 
 
 @Database(entities = [BrandEntity::class, PriceEntity::class, ProductEntity::class, StoreEntity::class], version = 1)
@@ -34,7 +41,7 @@ abstract class AppDatabase: RoomDatabase() {
                             override fun onCreate(db: SupportSQLiteDatabase) {
                                 super.onCreate(db)
                             }
-                        }).allowMainThreadQueries().build()
+                        }).build()
                 }
 
                 return INSTANCE as AppDatabase

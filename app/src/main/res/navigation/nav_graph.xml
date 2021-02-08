@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/productsFragment">
+    app:startDestination="@id/products_nav_graph">
 
     <activity
         android:id="@+id/mainActivity"
@@ -11,26 +11,66 @@
         android:label="activity_main"
         tools:layout="@layout/activity_main" />
 
-    <fragment
-        android:id="@+id/productsFragment"
-        android:name="com.mahozi.sayed.comparisist.products.ProductsFragment"
-        android:label="@string/fragment_products"
-        tools:layout="@layout/fragment_products" >
-        <action
-            android:id="@+id/action_productsFragment_to_createProductFragment"
-            app:destination="@id/createProductFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/createProductFragment"
-        android:name="com.mahozi.sayed.comparisist.products.CreateProductFragment"
-        android:label="Create a product"
-        tools:layout="@layout/fragment_create_product" >
-        <action
-            android:id="@+id/action_createProductFragment_to_QRScanFragment"
-            app:destination="@id/QRScanFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/QRScanFragment"
-        android:name="com.mahozi.sayed.comparisist.products.qr.QRScanFragment"
-        android:label="QRScanFragment" />
+    <navigation android:id="@+id/products_nav_graph"
+        app:startDestination="@id/productsFragment">
+        <fragment
+            android:id="@+id/productsFragment"
+            android:name="com.mahozi.sayed.comparisist.products.overview.ProductsFragment"
+            android:label="@string/fragment_products"
+            tools:layout="@layout/fragment_products">
+            <action
+                android:id="@+id/action_productsFragment_to_createProductFragment"
+                app:destination="@id/createProductFragment" />
+            <action
+                android:id="@+id/action_productsFragment_to_pricesFragment"
+                app:destination="@id/prices_nav_graph" />
+        </fragment>
+        <fragment
+            android:id="@+id/createProductFragment"
+            android:name="com.mahozi.sayed.comparisist.products.create.CreateProductFragment"
+            android:label="Create a product"
+            tools:layout="@layout/fragment_create_product">
+            <action
+                android:id="@+id/action_createProductFragment_to_QRScanFragment"
+                app:destination="@id/QRScanFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/QRScanFragment"
+            android:name="com.mahozi.sayed.comparisist.products.create.qr.BarcodeScannerFragment"
+            android:label="QRScanFragment" />
+    </navigation>
+    <navigation android:id="@+id/prices_nav_graph"
+        app:startDestination="@id/pricesFragment">
+
+        <!--arguments need to be defined in the graph and the argument. WHY GooGlE WhY!!!! -->
+        <argument
+            android:name="productId"
+            app:argType="long" />
+        <argument
+            android:name="storeId"
+            app:argType="long" />
+
+        <fragment
+            android:id="@+id/pricesFragment"
+            android:name="com.mahozi.sayed.comparisist.prices.main.PricesFragment"
+            android:label="fragment_prices"
+            tools:layout="@layout/fragment_prices">
+            <argument
+                android:name="productId"
+                app:argType="long" />
+            <argument
+                android:name="storeId"
+                app:argType="long" />
+            <action
+                android:id="@+id/action_pricesFragment_to_createPriceFragment"
+                app:destination="@id/createPriceFragment"/>
+
+
+        </fragment>
+        <fragment
+            android:id="@+id/createPriceFragment"
+            android:name="com.mahozi.sayed.comparisist.prices.create.CreatePriceFragment"
+            android:label="fragment_create_price"
+            tools:layout="@layout/fragment_create_price" />
+    </navigation>
 </navigation>

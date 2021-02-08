@@ -20,4 +20,6 @@
     <string name="deal">Deal</string>
     <string name="unit">Unit</string>
     <string name="scan_barcode">Scan Barcode</string>
+    <string name="search_title">Product, brand, and store</string>
+    <string name="search_hint">Product name, brand, and store</string>
 </resources>

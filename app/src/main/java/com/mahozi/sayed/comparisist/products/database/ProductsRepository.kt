@@ -1,9 +1,25 @@
 package com.mahozi.sayed.comparisist.products.database
 
+import android.util.Log
 import androidx.lifecycle.LiveData
-import com.mahozi.sayed.comparisist.products.ProductFormModel
+import androidx.room.withTransaction
+import com.mahozi.sayed.comparisist.products.create.ProductFormModel
+import com.mahozi.sayed.comparisist.AppDatabase
+import com.mahozi.sayed.comparisist.Resource
+import com.mahozi.sayed.comparisist.products.database.brand.BrandEntity
+import com.mahozi.sayed.comparisist.prices.database.PriceEntity
+import com.mahozi.sayed.comparisist.products.create.ProductService
+import com.mahozi.sayed.comparisist.products.database.product.ProductDto
+import com.mahozi.sayed.comparisist.products.database.product.ProductEntity
+import com.mahozi.sayed.comparisist.products.database.product.ProductWithBrand
+import com.mahozi.sayed.comparisist.products.database.store.StoreEntity
+import com.mahozi.sayed.comparisist.products.database.product.ProductResponse
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import retrofit2.Retrofit
+import java.lang.Exception
 
-class ProductsRepository(private val database: AppDatabase) {
+class ProductsRepository(private val database: AppDatabase, private val retrofit: Retrofit) {
 
     private val brandDao = database.brandDao
     private val priceDao = database.priceDao
@@ -11,84 +27,132 @@ class ProductsRepository(private val database: AppDatabase) {
     private val storeDao = database.storeDao
 
 
-    fun selectAllProductsAndPrices(): LiveData<List<ProductModel>>{
+    fun selectAllProductsAndPrices(): LiveData<List<ProductDto>>{
 
         return productDao.selectAllProductsAndPrices()
     }
 
 
-    fun selectAllProducts(): List<ProductEntity>{
-
-        return productDao.selectAllProducts()
-    }
 
 
-    fun selectAllBrands(): List<BrandEntity> {
+    suspend fun insertProduct(productFormModel: ProductFormModel){
 
-        return brandDao.selectAllBrands()
-    }
+        database.withTransaction {
 
-    fun selectAllStores():List<StoreEntity>{
+            //TODO clean uP 7uP
+            var brandId = brandDao.selectIdBy(productFormModel.brandName)
 
-        return storeDao.selectAllStores()
-    }
-
-
-
-
-    fun insertProduct(productFormModel: ProductFormModel){
-
-        var brandId = productFormModel.brandId
-        var storeId = productFormModel.storeId
-        var productId = productFormModel.productId
-
-
-        database.runInTransaction {
-
-            if (brandId == -1L){
+            if (brandId == null){
 
                 brandId = brandDao.insert(BrandEntity(productFormModel.brandName))
             }
 
 
-            if (storeId == -1L){
+            var productId = productDao.selectIdBy(
+                productFormModel.productName,
+                brandId,
+                productFormModel.size,
+                productFormModel.sizeUnit)
+
+            if (productId == null){
+
+                productId = productDao.insert(
+                    ProductEntity(
+                        productFormModel.productName,
+                        brandId,
+                        productFormModel.size,
+                        productFormModel.sizeUnit,
+                        productFormModel.productImagePath,
+                        productFormModel.barcode
+                    )
+                )
+            }
+
+            var storeId = storeDao.selectIdBy(productFormModel.storeName)
+
+            if (storeId == null){
 
                 storeId = storeDao.insert(StoreEntity(productFormModel.storeName))
             }
 
-            if (productId == -1L){
 
-                productId = productDao.insert(ProductEntity(
-                    productFormModel.productName,
-                    brandId,
-                    productFormModel.size,
-                    productFormModel.unit
-                ))
-            }
-
-            if (isPriceInfoValid(productFormModel.price)){
-
-                priceDao.insert(PriceEntity(
-                    productId,
-                    productFormModel.price,
-                    storeId,
-                    productFormModel.quantity,
-                    productFormModel.isDeal,
-                    productFormModel.date
-
-                ))
-            }
-
-
+            priceDao.insert(
+                PriceEntity(
+                productId,
+                productFormModel.price,
+                storeId,
+                productFormModel.quantity,
+                productFormModel.isDeal,
+                productFormModel.dateAdded
+                )
+            )
         }
     }
 
-    private fun isPriceInfoValid(price: Double): Boolean{
 
-        if (price == -1.0){
-            return false
+    suspend fun selectProductBy(barcode: String): Resource<ProductWithBrand>{
+
+        try {
+
+            var productWithBrand = selectProductWithBrandLocallyBy(barcode)
+
+            //if product not available locally
+            if (productWithBrand == null){
+
+                val productResponse = getProductFromService(barcode)
+
+
+                //check if product available in database
+                if (productResponse.status == "0") {
+
+                    return Resource.error("Product not found")
+                }
+
+                productWithBrand = mapProductResponseToProductWithBrand(productResponse, barcode)
+            }
+
+            return Resource.success(productWithBrand)
         }
 
-        return true
+        catch (e: Exception){
+
+            return Resource.error("No internet")
+
+        }
+
     }
+
+
+    private suspend fun selectProductWithBrandLocallyBy(barcode: String): ProductWithBrand? = withContext(Dispatchers.IO){
+
+        return@withContext productDao.selectProductWithBrandBy(barcode)
+    }
+
+
+    private suspend fun getProductFromService(barcode: String): ProductResponse = withContext(Dispatchers.IO){
+
+        Log.d("gggg", "getProductFromService: ")
+        val productService = retrofit.create(ProductService::class.java)
+
+        return@withContext productService.selectProductByBarcode(barcode)
+
+    }
+
+    private fun mapProductResponseToProductWithBrand(productResponse: ProductResponse, barcode: String): ProductWithBrand{
+
+        val imagePath = (productResponse.productInfo.imageUrl)
+
+        val name = (productResponse.productInfo.productName)
+        val brand = (productResponse.productInfo.brandName)
+
+        val sizeAndUnit = productResponse.productInfo.sizeAndUnit.split(" ")
+
+        val size = (sizeAndUnit[0])
+        val unit = (sizeAndUnit[1])
+
+        //id is 0 because product will be inserted locally by Room which takes 0 for autogenerated id
+        return ProductWithBrand(0L, name, brand, size.toDouble(), unit, imagePath, barcode)
+    }
+
+
 }
