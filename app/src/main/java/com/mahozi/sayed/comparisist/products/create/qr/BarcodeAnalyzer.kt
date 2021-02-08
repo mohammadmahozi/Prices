@@ -1,4 +1,4 @@
-package com.mahozi.sayed.comparisist.products.qr
+package com.mahozi.sayed.comparisist.products.create.qr
 
 import android.util.Log
 import androidx.camera.core.ExperimentalGetImage
@@ -7,7 +7,7 @@ import androidx.camera.core.ImageProxy
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 
-class QrCodeAnalyzer(private val listener: ScanningResultListener) : ImageAnalysis.Analyzer {
+class BarcodeAnalyzer(private val listener: BarcodeScannerListener) : ImageAnalysis.Analyzer {
 
     private var isScanning: Boolean = false
 

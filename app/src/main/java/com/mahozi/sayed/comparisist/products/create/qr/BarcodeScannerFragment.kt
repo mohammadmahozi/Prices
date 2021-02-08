@@ -1,4 +1,4 @@
-package com.mahozi.sayed.comparisist.products.qr
+package com.mahozi.sayed.comparisist.products.create.qr
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -16,14 +16,13 @@ import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.mahozi.sayed.comparisist.R
+import androidx.navigation.findNavController
 import com.mahozi.sayed.comparisist.databinding.FragmentQrScanBinding
-import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
-class QRScanFragment : Fragment() {
+class BarcodeScannerFragment : Fragment() {
 
     private var _binding: FragmentQrScanBinding? = null
     private val binding get() = _binding!!
@@ -94,9 +93,14 @@ class QRScanFragment : Fragment() {
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build()
 
 
-            val analyzer: ImageAnalysis.Analyzer = QrCodeAnalyzer(object : ScanningResultListener {
+            val analyzer: ImageAnalysis.Analyzer = BarcodeAnalyzer(object : BarcodeScannerListener {
                 override fun onScanned(result: String) {
                     requireActivity().runOnUiThread {
+
+                        val navController = binding.root.findNavController()
+                        navController.previousBackStackEntry?.savedStateHandle?.set(SCANNED_BARCODE_KEY, result)
+                        navController.popBackStack()
+
 
                         imageAnalysis.clearAnalyzer()
 
@@ -163,6 +167,9 @@ class QRScanFragment : Fragment() {
         private const val TAG = "QRScanFragment"
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
+
+        const val SCANNED_BARCODE_KEY = "scannedBaCode"
+
     }
 
 
